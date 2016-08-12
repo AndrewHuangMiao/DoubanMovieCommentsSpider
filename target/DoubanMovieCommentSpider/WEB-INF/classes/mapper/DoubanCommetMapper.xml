@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yue.Crawel.dao.DoubanCommetMapper">
+
+    <resultMap id="doubanCommentMap" type="com.yue.Crawel.model.DoubanComment">
+        <result property="userName" column="username"/>
+        <result property="comment" column="comment"/>
+        <result property="time" column="create_time"/>
+        <result property="star" column="star"/>
+        <result property="movieName" column="movie_name"/>
+        <result property="headUrl" column="head_url"/>
+    </resultMap>
+
+    <resultMap id="movieDetailMap" type="com.yue.Crawel.model.MovieDetail">
+        <result property="movieName" column="movie_name"/>
+        <result property="director" column="director"/>
+        <result property="time" column="create_time"/>
+        <result property="actors" column="actors"/>
+        <result property="type" column="type"/>
+        <result property="movieImg" column="img_url"/>
+        <result property="totalComment" column="totalComment"/>
+    </resultMap>
+
+    <select id="getDoubanCommentsFromDB" resultMap="doubanCommentMap">
+            select * from douban_movie_comment where movie_name = #{movieName} limit #{currentSize}, #{pageSize}
+    </select>
+
+    <insert id="saveComments2DB">
+        INSERT INTO douban_movie_comment (username,comment,create_time,star,movie_name,head_url)
+        VALUES
+         (#{doubanComment.userName},#{doubanComment.comment},#{doubanComment.time},#{doubanComment.star},
+         #{doubanComment.movieName}, #{doubanComment.headUrl})
+    </insert>
+
+    <select id="checkMovieExist" resultType="Integer">
+        select count(1) from movie where movie_name = #{movieName}
+    </select>
+
+    <select id="getMovieDetailFromDB" resultMap="movieDetailMap">
+        select * from movie where movie_name = #{movieName}
+    </select>
+
+    <insert id="saveMovieDetail">
+       INSERT INTO movie (movie_name,director,actors,img_url,type,time,duration,area,totalComment)
+        VALUES
+         (#{movieDetail.movieName},#{movieDetail.director},#{movieDetail.actors},#{movieDetail.movieImg},#{movieDetail.type},
+         #{movieDetail.time}, #{movieDetail.duration},#{movieDetail.area},#{movieDetail.totalComment})
+    </insert>
+
+    <select id="getTotalCount" resultType="Integer">
+        select count(1) from douban_movie_comment where movie_name = #{movieName}
+    </select>
+
+    <select id="getAllMovieDetail" resultMap="movieDetailMap">
+        select * from movie;
+    </select>
+
+    <delete id="deleteMovieDetail">
+        delete from movie where movie_name = #{movieName}
+    </delete>
+
+    <delete id="deleteMovieComment">
+        DELETE  from douban_movie_comment where movie_name = #{movieName}
+    </delete>
+
+    <select id="getAllDoubanComment" resultMap="doubanCommentMap">
+        select * from douban_movie_comment where movie_name = #{movieName}
+    </select>
+
+    <insert id="updateMovieDetail">
+        replace INTO movie (movie_name,director,actors,img_url,type,time,duration,area,totalComment)
+        VALUES
+        (#{movieDetail.movieName},#{movieDetail.director},#{movieDetail.actors},#{movieDetail.movieImg},#{movieDetail.type},
+        #{movieDetail.time}, #{movieDetail.duration},#{movieDetail.area},#{movieDetail.totalComment})
+    </insert>
+
+    <select id="getMovieByPage" resultMap="movieDetailMap">
+        select * from movie ORDER BY id  DESC limit #{currentSize}, #{pageSize}
+    </select>
+
+    <select id="getBackUpDoubanComment" resultMap="doubanCommentMap">
+        select * from doubanComment_back where movie_name = #{movieName}
+    </select>
+
+    <select id="getBackUpMovieDetail" resultMap="movieDetailMap">
+        select * from movie_back where movie_name = #{movieName}
+    </select>
+</mapper>

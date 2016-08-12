@@ -1,0 +1,52 @@
+<!-- Modal -->
+<div class="modal fade" id="modifyMovieDetail" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">电影信息</h4>
+            </div>
+            <div class="modal-body">
+                <form class="form-inline" action="http://localhost:8080/crawel/changeMovieDetail">
+                    <div class="form-group">
+                        <label for="movieName_modify">电影名称</label>
+                        <input type="text" class="form-control" id="movieName_modify" name="movieName_modify">
+                    </div>
+                    <div class="form-group">
+                        <label for="director_modify">导演</label>
+                        <input type="text" class="form-control" id="director_modify" name="director_modify">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="type_modify">类型</label>
+                        <input type="text" class="form-control" id="type_modify" name="type_modify">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="time_modify">上映时间</label>
+                        <input type="text" class="form-control" id="time_modify" name="time_modify">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="duration_modify">时长</label>
+                        <input type="text" class="form-control" id="duration_modify" name="duration_modify">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="area_modify">地区</label>
+                        <input type="text" class="form-control" id="area_modify" name="area_modify">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="headUrl_modify">图片</label>
+                        <input type="text" class="form-control" id="headUrl_modify" name="headUrl_modify">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                <button type="submit" class="btn btn-primary">提交</button>
+            </div>
+        </div>
+    </div>
+</div>
