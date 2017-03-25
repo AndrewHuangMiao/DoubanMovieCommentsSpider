@@ -185,43 +185,4 @@ public class DoubanSubjectCrawler implements Serializable {
         return new String(randBuffer);
     }
 
-    public static void main(String[] args) throws IOException {
-//        DoubanSubjectCrawler doubanSubjectCrawler = new DoubanSubjectCrawler();
-//        doubanSubjectCrawler.getSubjects(2015, 260);
-
-
-
-        DoubanSubjectCrawler doubanSubjectCrawler = new DoubanSubjectCrawler();
-        String dir = "douban/";
-        for(int year = 1914; year>=1900; year--) {
-            BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(new File(dir + year+".txt")));
-            System.out.println("====================");
-            System.out.println("start year: " + year);
-            int maxPage = doubanSubjectCrawler.getTotalPage(year);
-            System.out.println("maxPage: " + maxPage);
-            Set<String> subjectIds = new HashSet<String>();
-
-            for (int i = 0; i < maxPage; i++) {
-                try {
-                    System.out.println("begin crawl year: " + year + ", page: " + i);
-                    List<DoubanSubject> subjects = doubanSubjectCrawler.getSubjects(year, i * ITEM_PER_PAGE);
-                    if (subjects != null) {
-                        for (DoubanSubject subject : subjects) {
-                            String subId = subject.getSubjectId();
-                            if (subjectIds.contains(subId)) continue;
-                            subjectIds.add(subId);
-//                            System.out.println(subject.getTitle() +"\t"+subject.getCountryTime());
-                            bufferedWriter.write(subject.toGsonString() + "\n");
-                        }
-                        bufferedWriter.flush();
-                    }
-                    System.out.println("finish crawl year: " + year + ", page: " + i + ", curSize: " + subjects.size() + ", totalSize: " + subjectIds.size());
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    System.out.println("fail crawl year: " + year + ", page: " + i + ", " + e.getMessage());
-                }
-            }
-            bufferedWriter.close();
-        }
-    }
 }

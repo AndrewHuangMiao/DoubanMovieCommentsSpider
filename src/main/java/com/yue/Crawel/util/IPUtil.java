@@ -1,6 +1,8 @@
 package com.yue.Crawel.util;
 
 
+import com.yue.Crawel.consts.Constant;
+import com.yue.Crawel.model.IpPort;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.logging.Log;
@@ -54,35 +56,43 @@ public class IPUtil {
         return ipPool;
     }
 
-    /*
-    启动一个线程去监控,每隔半个小时就更换一次代理ip和port
-    要注意多线程情况下ip2PortList这个对象存在竟态条件
+    /**
+     * 初始化代理ip和端口
+     * @param page
+     * @param emptyFlag
      */
-//    public static void getIp2PortList(final List<Map.Entry<String, Integer>> ip2PortList) {
-//
-//        Runnable ip2PortCrawel = new Runnable() {
-//            public void run() {
-//                while (true) {
-//                    Map<String, Integer> ip2portPool = IPUtil.getIps();
-//                    synchronized (ip2PortList){
-//                        ip2PortList.clear();
-//                        for (Map.Entry<String, Integer> ip2Port : ip2portPool.entrySet()) {
-//                            ip2PortList.add(ip2Port);
-//                        }
-//                    }
-//
-//                    try {
-//                        Thread.sleep(1000 * 60 * 10);
-//                    } catch (InterruptedException e) {
-//                        e.printStackTrace();
-//                        LOG.info("定时器发生错误!");
-//                    }
-//                }
-//            }
-//        };
-//
-//        Thread ip2PortThread = new Thread(ip2PortCrawel);
-//        ip2PortThread.start();
-//
-//    }
+    public static void initProxyIpPortList(int page, boolean emptyFlag, List<IpPort> ipPortList){
+        String url = "http://dev.kuaidaili.com/api/getproxy?orderid=986407925598983&num=100&kps=1";
+        HttpClient httpClient = new HttpClient();
+        httpClient.setConnectionTimeout(Constant.CONNECT_TIMEOUT);
+        httpClient.setTimeout(Constant.SOCK_TIMEOUT);
+        httpClient.getHttpConnectionManager().getParams().setSoTimeout(Constant.SOCK_TIMEOUT);
+        httpClient.getHttpConnectionManager().getParams().setConnectionTimeout(Constant.CONNECT_TIMEOUT);
+        final GetMethod getMethod = new GetMethod(url);
+
+        while(true){
+            if(page > 5){
+                return;
+            }
+
+            try {
+                if (emptyFlag && page < 5) {
+                    httpClient.executeMethod(getMethod);
+                    String html = getMethod.getResponseBodyAsString();
+                    String[] ip2PortArr = html.split(":");
+                    IpPort ipPort = new IpPort(ip2PortArr[0], Integer.parseInt(ip2PortArr[1]));
+                    synchronized (ipPortList) {
+                        ipPortList.add(ipPort);
+                        emptyFlag = false;
+                    }
+                    page++;
+                    Thread.sleep(1000);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                return;
+            }
+        }
+    }
+
 }

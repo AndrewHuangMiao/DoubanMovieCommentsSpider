@@ -9,14 +9,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created with IntelliJ IDEA.
- * Author: abekwok
- * Create: 9/18/14
+ * Author: andrew.huang
  */
 public class DoubanCommentCrawlerMap implements FlatMapFunction<CrawlItem, DoubanComment> {
     private static final long serialVersionUID = -3986244606585552569L;
     private static Log LOG = LogFactory.getLog(DoubanCommentCrawlerMap.class);
     private static DoubanCrawler crawler;
+
     public Iterable<DoubanComment> call(CrawlItem crawlItem) throws Exception {
         if(crawler==null){
             crawler = new DoubanCrawler();
@@ -29,6 +28,7 @@ public class DoubanCommentCrawlerMap implements FlatMapFunction<CrawlItem, Douba
         if(comments == null){
             comments = new ArrayList<DoubanComment>();
         }
+
         return comments;
     }
 }

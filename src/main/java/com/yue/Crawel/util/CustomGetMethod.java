@@ -4,7 +4,6 @@ package com.yue.Crawel.util;
  * Created with IntelliJ IDEA.
  *
  * @author andrew
- * @since 2014/8/27
  */
 
 import java.io.IOException;

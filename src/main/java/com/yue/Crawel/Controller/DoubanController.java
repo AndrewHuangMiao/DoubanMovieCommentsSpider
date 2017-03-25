@@ -107,23 +107,29 @@ public class DoubanController {
     @RequestMapping("/checkMovie")
     @ResponseBody
     public Boolean checkMovie(HttpServletRequest request){
-        Map<String,String[]> requestMap = request.getParameterMap();
-        String movieName = null;
         try {
-            movieName = requestMap.get("movieName")[0];
+            Map<String, String[]> requestMap = request.getParameterMap();
+            String movieName = null;
+            try {
+                movieName = requestMap.get("movieName")[0];
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            if (movieName == null || movieName.equals("")) {
+                System.out.println("无法得到正确的movieName!");
+                return false;
+            }
+            Boolean isExist = doubanService.checkMovieExist(movieName);
+            if (isExist) {
+                return true;
+            } else {
+                return false;
+            }
         }catch (Exception e){
             e.printStackTrace();
         }
-        if(movieName==null || movieName.equals("")){
-            System.out.println("无法得到正确的movieName!");
-            return false;
-        }
-        Boolean isExist = doubanService.checkMovieExist(movieName);
-        if(isExist){
-            return true;
-        }else{
-            return false;
-        }
+
+        return false;
     }
 
     @RequestMapping("/getTotalCount")

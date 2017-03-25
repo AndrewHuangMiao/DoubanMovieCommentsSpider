@@ -1,9 +1,7 @@
 package com.yue.Crawel.util;
 
 /**
- * Created with IntelliJ IDEA.
  * Author: andrew
- * Create: 3/23/14
  */
 public class SparkConsts {
     

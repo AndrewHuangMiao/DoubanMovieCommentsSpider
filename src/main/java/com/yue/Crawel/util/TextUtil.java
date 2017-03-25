@@ -3,9 +3,7 @@ package com.yue.Crawel.util;
 import java.util.List;
 
 /**
- * Created with IntelliJ IDEA.
  * Author: andrew
- * Create: 6/23/14
  */
 public class TextUtil {
     /**

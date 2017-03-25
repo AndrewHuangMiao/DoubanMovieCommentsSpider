@@ -1,10 +1,10 @@
 package com.yue.Crawel.douban;
 
+import com.yue.Crawel.consts.Constant;
 import com.yue.Crawel.model.CrawlItem;
 import com.yue.Crawel.model.DoubanComment;
-import com.yue.Crawel.model.IP2Port;
+import com.yue.Crawel.model.IpPort;
 import com.yue.Crawel.model.MovieDetail;
-import com.yue.Crawel.util.HttpUtil;
 import com.yue.Crawel.util.IPUtil;
 import com.yue.Crawel.util.StringUtil;
 import com.yue.Crawel.util.TextUtil;
@@ -37,16 +37,16 @@ public class DoubanCrawler implements Serializable {
     private static Integer page = 1;
     //用来判断ip队列是否为空,当为空的话重新进行抓取
     private static Boolean emptyFlag = true;
-    private static List<IP2Port> ip2PortList = new LinkedList<IP2Port>();
+    private static List<IpPort> ipPortList = new LinkedList<IpPort>();
     private static Log LOG = LogFactory.getLog(DoubanCrawler.class);
     private static final long serialVersionUID = -3986244606585552569L;
     private static final String URL_TMPLT = "https://movie.douban.com/subject/%s/comments?start=%s&limit=%s&sort=time";
     //    private static final String USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.9; rv:33.0) Gecko/20100101 Firefox/33.0";
     private static final String USER_AGENT = "Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 6.1; WOW64; Trident/5.0; SLCC2; .NET CLR 2.0.50727; .NET CLR 3.5.30729; .NET CLR 3.0.30729; Media Center PC 6.0; .NET4.0C; .NET4.0E)";
     private String cacheCookie = "gr_user_id=3e378661-2458-42ba-824a-fb90e0658039;bid=\"7Hku0QjxH11\"";
-    private static final int SOCK_TIMEOUT = 30000;
+
     private static int index = 0;
-    private static final int CONNECT_TIMEOUT = 30000;
+
 
     public List<DoubanComment> getComments(CrawlItem crawlItem) throws IOException {
         return getComments(crawlItem.getSubjectId(), crawlItem.getStart(), crawlItem.getLimit());
@@ -66,24 +66,23 @@ public class DoubanCrawler implements Serializable {
         return parseDetail(getPage(subjectId, 0, 0));
     }
 
-    /*
-    这里会开始去某个网站抓取代理ip
+    /**
+     * 使用代理ip抓取网站页面信息
      */
     public String getPage(String subjectId, int start, int limit) {
         try {
-            //用来判断使用到了代理ip的第几位
-            ExecutorService executor = Executors.newSingleThreadExecutor();
-            executor.execute(getIpCrawel(ip2PortList));
 
+            IPUtil.initProxyIpPortList(page, emptyFlag, ipPortList);
             cacheCookie = genRandomBrowserId();
             String url = genUrl(subjectId, start, limit);
             HttpClient httpClient = new HttpClient();
 
             //使用代理ip进行抓取数据
-            httpClient.setConnectionTimeout(CONNECT_TIMEOUT);
-            httpClient.setTimeout(SOCK_TIMEOUT);
-            httpClient.getHttpConnectionManager().getParams().setSoTimeout(SOCK_TIMEOUT);
-            httpClient.getHttpConnectionManager().getParams().setConnectionTimeout(CONNECT_TIMEOUT);
+            httpClient.setConnectionTimeout(Constant.CONNECT_TIMEOUT);
+            httpClient.setTimeout(Constant.SOCK_TIMEOUT);
+            httpClient.getHttpConnectionManager().getParams().setSoTimeout(Constant.SOCK_TIMEOUT);
+            httpClient.getHttpConnectionManager().getParams().setConnectionTimeout(Constant.CONNECT_TIMEOUT);
+            //因为国内网络问题这里使用了代理ip
             httpClient.getHostConfiguration().setProxy("115.159.108.142", 16816);
             httpClient.getParams().setAuthenticationPreemptive(true);
             httpClient.getState().setProxyCredentials(AuthScope.ANY, new UsernamePasswordCredentials("452978456", "6kn29dwa"));
@@ -110,27 +109,27 @@ public class DoubanCrawler implements Serializable {
                     String bid = "7Hku0QjxH" + Integer.toString(new Random().nextInt(9)) + Integer.toString(new Random().nextInt(9));
                     cacheCookie = getCookie(bid);
                     HttpClient httpClientSpare = new HttpClient();
-                    httpClientSpare.setConnectionTimeout(CONNECT_TIMEOUT);
-                    httpClientSpare.setTimeout(SOCK_TIMEOUT);
-                    httpClientSpare.getHttpConnectionManager().getParams().setSoTimeout(SOCK_TIMEOUT);
-                    httpClientSpare.getHttpConnectionManager().getParams().setConnectionTimeout(CONNECT_TIMEOUT);
+                    httpClientSpare.setConnectionTimeout(Constant.CONNECT_TIMEOUT);
+                    httpClientSpare.setTimeout(Constant.SOCK_TIMEOUT);
+                    httpClientSpare.getHttpConnectionManager().getParams().setSoTimeout(Constant.SOCK_TIMEOUT);
+                    httpClientSpare.getHttpConnectionManager().getParams().setConnectionTimeout(Constant.CONNECT_TIMEOUT);
                     final GetMethod getMethodSecond = new GetMethod(url);
                     getMethodSecond.setRequestHeader("User-Agent", USER_AGENT);
                     getMethodSecond.setRequestHeader("Cookie", cacheCookie);
                     getMethodSecond.setRequestHeader("Referer", "http://movie.douban.com/subject/" + subjectId + "/?from=showing");
 
-                    if(!emptyFlag && index <= ip2PortList.size()) {
-                        synchronized (ip2PortList) {
-                            if(index==ip2PortList.size()){
-//                                ip2PortList.clear();
+                    if(!emptyFlag && index <= ipPortList.size()) {
+                        synchronized (ipPortList) {
+                            if(index== ipPortList.size()){
+//                                ipPortList.clear();
 //                                emptyFlag = true;
                                 index = 0;
                                 return html;
 //                                return html;
                             }
 
-                            IP2Port ip2Port = ip2PortList.get(index);
-                            HttpHost proxy = new HttpHost(ip2Port.getIp(), ip2Port.getPort());
+                            IpPort ipPort = ipPortList.get(index);
+                            HttpHost proxy = new HttpHost(ipPort.getIp(), ipPort.getPort());
                             httpClientSpare.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY, proxy);
                             index++;
                         }
@@ -171,55 +170,6 @@ public class DoubanCrawler implements Serializable {
         String cookie = "_ga=GA1.2.1390427853.1439113839; lzstat_uv=1389762687912142207|3600220; gr_user_id=3e378661-2458-42ba-824a-fb90e0658039; ll=\"118281\"; viewed=\"5287474_6781808_21979064_2041304_26422275_1456987_26364303_10558241_3879301_1183730\"; ct=y; _pk_ref.100001.4cf6=%5B%22%22%2C%22%22%2C1462782138%2C%22https%3A%2F%2Fwww.baidu.com%2Flink%3Furl%3DX-uu2Q7MAufDcrlHbkHg4BsEKlXQsg0uHAldXs3RjdWljgw3z1DwyDCAgV_efUt2%26wd%3D%26eqid%3Db2d1865a0018b09700000006572bf4bc%22%5D; __utmt=1; as=\"https://movie.douban.com/subject/11625097/comments?start=30&limit=20&sort=new_score\"; ps=y; dbcl2=\"84670909:THfUsMyEGgQ\"; ck=Ifoc; push_noty_num=1; push_doumail_num=0; _pk_id.100001.4cf6=6825e43da4c35351.1452617847.21.1462782431.1462526020.; _pk_ses.100001.4cf6=*; __utma=30149280.1390427853.1439113839.1462526019.1462782138.69; __utmb=30149280.2.10.1462782138; __utmc=30149280; __utmz=30149280.1462526019.68.59.utmcsr=baidu|utmccn=(organic)|utmcmd=organic; __utma=223695111.1390427853.1439113839.1462526019.1462782138.17; __utmb=223695111.0.10.1462782138; __utmc=223695111; __utmz=223695111.1462526019.16.13.utmcsr=baidu|utmccn=(organic)|utmcmd=organic";
         return (bidCookie + cookie);
     }
-
-
-    /*
-    启动一个监控线程当empty的时候抓取下一页的ip和port,直到page为5
-     */
-//
-
-
-    private Runnable getIpCrawel(final List<IP2Port> ip2PortList) {
-        Runnable ipCrawel = new Runnable() {
-            public void run() {
-                String url = "http://dev.kuaidaili.com/api/getproxy?orderid=986407925598983&num=100&kps=1";
-                HttpClient httpClient = new HttpClient();
-                httpClient.setConnectionTimeout(CONNECT_TIMEOUT);
-                httpClient.setTimeout(SOCK_TIMEOUT);
-                httpClient.getHttpConnectionManager().getParams().setSoTimeout(SOCK_TIMEOUT);
-                httpClient.getHttpConnectionManager().getParams().setConnectionTimeout(CONNECT_TIMEOUT);
-                final GetMethod getMethod = new GetMethod(url);
-
-                while(true){
-                    if(page > 5){
-                        return;
-                    }
-
-                    try {
-                        if (emptyFlag && page < 5) {
-                            httpClient.executeMethod(getMethod);
-                            String html = getMethod.getResponseBodyAsString();
-                            String[] ip2PortArr = html.split(":");
-                            IP2Port ip2Port = new IP2Port(ip2PortArr[0], Integer.parseInt(ip2PortArr[1]));
-                            synchronized (ip2PortList) {
-                                ip2PortList.add(ip2Port);
-                                emptyFlag = false;
-                            }
-                            page++;
-                            Thread.sleep(1000);
-                        }
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        return;
-                    }
-                }
-            }
-        };
-        return ipCrawel;
-    }
-
-
-
 
     private boolean isForbid(String html) {
         if (html.contains("403 Forbidden") || !html.contains("browserId")) {

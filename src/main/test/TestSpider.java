@@ -1,28 +1,15 @@
 import com.yue.Crawel.Service.DoubanService;
 import com.yue.Crawel.model.DoubanComment;
-import com.yue.Crawel.model.IP2Port;
-import com.yue.Crawel.util.DoubanCommentUtil;
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import javax.annotation.Resource;
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.math.BigInteger;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Random;
 
 /**
  * Created by Andrew on 16/4/29.

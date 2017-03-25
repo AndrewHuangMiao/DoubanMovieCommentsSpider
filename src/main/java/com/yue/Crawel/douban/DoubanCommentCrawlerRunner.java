@@ -21,7 +21,6 @@ import java.util.List;
 public final class DoubanCommentCrawlerRunner implements Serializable {
     private static Log LOG = LogFactory.getLog(DoubanCommentCrawlerRunner.class);
     private static final long serialVersionUID = -3986244606585552569L;
-    private String sparkUrl;
     private String[] jars;
     private JavaSparkContext jsc;
     private String subjectId;
@@ -48,9 +47,7 @@ public final class DoubanCommentCrawlerRunner implements Serializable {
         try {
 
             initCrawel(movieId);
-            List<CrawlItem> items;
-
-            items = produceCrawelItems(movieId);
+            List<CrawlItem> items = produceCrawelItems(movieId);
             doubanComments = crawlComment(items);
             jsc.stop();
         } catch (Exception e) {
